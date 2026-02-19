@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Board Meeting Poll</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
+
+    header {
+      text-align: center;
+      padding: 32px 0 24px;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #1a1a2e;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.15s;
+      background: #fff;
+    }
+
+    input[type="text"]:focus,
+    input[type="date"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 22px;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background-color 0.15s, opacity 0.15s;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #d1d5db;
+    }
+
+    .btn-small {
+      padding: 6px 14px;
+      font-size: 0.85rem;
+    }
+
+    .btn-danger {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #fecaca;
+    }
+
+    /* Date list for poll creation */
+    .date-list {
+      list-style: none;
+      margin-bottom: 12px;
+    }
+
+    .date-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #f9fafb;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+
+    .date-list li span {
+      font-weight: 500;
+    }
+
+    .date-add-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .date-add-row input[type="date"] {
+      flex: 1;
+    }
+
+    /* Vote checkboxes */
+    .vote-option {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      background: #f9fafb;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background-color 0.15s;
+      border: 2px solid transparent;
+      user-select: none;
+    }
+
+    .vote-option:hover {
+      background: #f0f4ff;
+    }
+
+    .vote-option.selected {
+      background: #eff6ff;
+      border-color: #2563eb;
+    }
+
+    .vote-option input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-right: 14px;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .vote-option-label {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .vote-option-day {
+      font-size: 0.85rem;
+      color: #6b7280;
+      margin-left: auto;
+      padding-left: 12px;
+    }
+
+    /* Results matrix */
+    .results-table-wrap {
+      overflow-x: auto;
+      margin: 16px -8px;
+      padding: 0 8px;
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .results-table th,
+    .results-table td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .results-table th {
+      font-weight: 600;
+      color: #374151;
+      background: #f9fafb;
+      position: sticky;
+      top: 0;
+    }
+
+    .results-table th:first-child,
+    .results-table td:first-child {
+      text-align: left;
+      font-weight: 500;
+    }
+
+    .results-table .best-date {
+      background: #ecfdf5;
+    }
+
+    .results-table .best-date td:first-child {
+      font-weight: 700;
+      color: #059669;
+    }
+
+    .vote-check {
+      color: #059669;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .vote-count {
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .totals-row td {
+      border-top: 2px solid #d1d5db;
+      font-weight: 600;
+      background: #f9fafb;
+    }
+
+    /* Links display */
+    .link-box {
+      background: #f0f4ff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+    }
+
+    .link-box label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #2563eb;
+      margin-bottom: 8px;
+    }
+
+    .link-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .link-row input {
+      flex: 1;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+
+    .copy-btn {
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    /* Alerts / messages */
+    .alert {
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .alert-success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+    }
+
+    .alert-error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+    }
+
+    .alert-info {
+      background: #eff6ff;
+      color: #1e40af;
+      border: 1px solid #bfdbfe;
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid #e5e7eb;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-msg {
+      text-align: center;
+      padding: 40px 0;
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    /* View visibility */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Thank-you view */
+    .thank-you {
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .thank-you .checkmark {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .thank-you h2 {
+      margin-bottom: 8px;
+    }
+
+    .thank-you p {
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    /* No votes message */
+    .no-votes {
+      text-align: center;
+      padding: 30px 0;
+      color: #6b7280;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container { padding: 16px 12px; }
+      .card { padding: 20px 16px; }
+      header { padding: 20px 0 16px; }
+      header h1 { font-size: 1.3rem; }
+    }
+
+    /* Duplicate vote warning */
+    .duplicate-warning {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+
+    .duplicate-warning .btn {
+      margin-top: 10px;
+    }
+
+    /* Admin results header */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .results-header h2 {
+      margin-bottom: 0;
+    }
+
+    .voter-count {
+      font-size: 0.85rem;
+      color: #6b7280;
+      background: #f3f4f6;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* Poll description in vote view */
+    .poll-description {
+      color: #6b7280;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Board Meeting Poll</h1>
+      <p id="header-subtitle">Find the best date for your next meeting</p>
+    </header>
+
+    <!-- VIEW: Create Poll -->
+    <div id="view-create" class="view">
+      <div class="card">
+        <h2>Create a New Poll</h2>
+        <div class="form-group">
+          <label for="poll-title">Poll Title</label>
+          <input type="text" id="poll-title" placeholder="e.g. Q3 Board Meeting" maxlength="100">
+        </div>
+        <div class="form-group">
+          <label for="poll-desc">Description (optional)</label>
+          <textarea id="poll-desc" placeholder="e.g. Please vote for your preferred date" maxlength="500"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Candidate Dates</label>
+          <ul class="date-list" id="date-list"></ul>
+          <div class="date-add-row">
+            <input type="date" id="date-input">
+            <button class="btn btn-secondary btn-small" id="add-date-btn">Add Date</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="create-poll-btn" style="width:100%; margin-top: 8px;" disabled>Create Poll</button>
+      </div>
+    </div>
+
+    <!-- VIEW: Poll Created (shows links) -->
+    <div id="view-created" class="view">
+      <div class="card">
+        <div class="alert alert-success">Poll created successfully!</div>
+        <div class="link-box">
+          <label>Share this link with board members</label>
+          <div class="link-row">
+            <input type="text" id="voter-link" readonly>
+            <button class="btn btn-primary btn-small copy-btn" data-copy="voter-link">Copy</button>
+          </div>
+        </div>
+        <div class="link-box">
+          <label>Your admin link (bookmark this!)</label>
+          <div class="link-row">
+            <input type="text" id="admin-link" readonly>
+            <button class="btn btn-primary btn-small copy-btn" data-copy="admin-link">Copy</button>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:#6b7280; margin-top:8px;">Save your admin link — you'll need it to view results.</p>
+        <button class="btn btn-secondary" id="view-results-btn" style="width:100%; margin-top:16px;">View Results</button>
+      </div>
+    </div>
+
+    <!-- VIEW: Vote -->
+    <div id="view-vote" class="view">
+      <div class="card">
+        <h2 id="vote-title"></h2>
+        <p class="poll-description" id="vote-desc"></p>
+        <div id="vote-dates"></div>
+        <div class="form-group" style="margin-top:20px;">
+          <label for="voter-name">Your Name</label>
+          <input type="text" id="voter-name" placeholder="e.g. Jane Smith" maxlength="60">
+        </div>
+        <div id="duplicate-warning" class="duplicate-warning" style="display:none;">
+          <strong>You've already voted.</strong> Submitting again will replace your previous vote.
+          <br>
+          <button class="btn btn-secondary btn-small" id="update-vote-btn">Update My Vote</button>
+        </div>
+        <button class="btn btn-primary" id="submit-vote-btn" style="width:100%;" disabled>Submit Vote</button>
+      </div>
+    </div>
+
+    <!-- VIEW: Thank You -->
+    <div id="view-thanks" class="view">
+      <div class="card thank-you">
+        <div class="checkmark">&#10003;</div>
+        <h2>Vote Submitted!</h2>
+        <p>Thank you for voting. The organizer will share the final date.</p>
+        <button class="btn btn-secondary" id="view-results-from-thanks-btn">View Current Results</button>
+      </div>
+    </div>
+
+    <!-- VIEW: Admin Results -->
+    <div id="view-admin" class="view">
+      <div class="card">
+        <div class="results-header">
+          <h2 id="admin-title"></h2>
+          <span class="voter-count" id="voter-count"></span>
+        </div>
+        <p class="poll-description" id="admin-desc" style="display:none;"></p>
+        <div id="results-content">
+          <div class="loading-msg"><span class="spinner"></span> Loading results...</div>
+        </div>
+        <button class="btn btn-secondary" id="refresh-results-btn" style="width:100%; margin-top:12px;">Refresh Results</button>
+        <div class="link-box" style="margin-top:20px;">
+          <label>Voter Link</label>
+          <div class="link-row">
+            <input type="text" id="admin-voter-link" readonly>
+            <button class="btn btn-primary btn-small copy-btn" data-copy="admin-voter-link">Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: Public Results (voter can see after voting) -->
+    <div id="view-results" class="view">
+      <div class="card">
+        <div class="results-header">
+          <h2 id="public-results-title"></h2>
+          <span class="voter-count" id="public-voter-count"></span>
+        </div>
+        <div id="public-results-content">
+          <div class="loading-msg"><span class="spinner"></span> Loading results...</div>
+        </div>
+        <button class="btn btn-secondary" id="refresh-public-results-btn" style="width:100%; margin-top:12px;">Refresh Results</button>
+      </div>
+    </div>
+
+    <!-- VIEW: Loading -->
+    <div id="view-loading" class="view">
+      <div class="card">
+        <div class="loading-msg"><span class="spinner"></span> Loading poll...</div>
+      </div>
+    </div>
+
+    <!-- VIEW: Not Found -->
+    <div id="view-notfound" class="view">
+      <div class="card">
+        <div class="alert alert-error">Poll not found. Please check the link and try again.</div>
+        <button class="btn btn-secondary" onclick="location.hash='#/'" style="margin-top:8px;">Create a New Poll</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Google Apps Script Backend ───
+    // REPLACE this URL with your deployed Apps Script web app URL.
+    // See SETUP.md for instructions.
+    const API_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
+    async function api(action, data = {}) {
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action, ...data }),
+        headers: { 'Content-Type': 'text/plain' },
+        redirect: 'follow'
+      });
+      var text = await resp.text();
+      try {
+        var result = JSON.parse(text);
+      } catch (e) {
+        console.error('API returned non-JSON:', text.substring(0, 200));
+        throw new Error('API error — check that the Apps Script is deployed correctly (see SETUP.md)');
+      }
+      if (result.error) throw new Error(result.error);
+      return result;
+    }
+
+    // ─── Utilities ───
+    function generateId(len = 8) {
+      const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+      let id = '';
+      const arr = new Uint8Array(len);
+      crypto.getRandomValues(arr);
+      for (let i = 0; i < len; i++) id += chars[arr[i] % chars.length];
+      return id;
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getDayName(dateStr) {
+      const d = new Date(dateStr + 'T12:00:00');
+      return d.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+
+    function getBaseUrl() {
+      return window.location.origin + window.location.pathname;
+    }
+
+    // ─── Router ───
+    const views = document.querySelectorAll('.view');
+
+    function showView(id) {
+      views.forEach(v => v.classList.remove('active'));
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function parseHash() {
+      const hash = window.location.hash || '#/';
+      if (hash.startsWith('#/admin/')) {
+        const rest = hash.slice(8);
+        const [pollId, qs] = rest.split('?');
+        const params = new URLSearchParams(qs || '');
+        return { view: 'admin', pollId, adminKey: params.get('key') };
+      }
+      if (hash.startsWith('#/poll/')) {
+        return { view: 'vote', pollId: hash.slice(6) };
+      }
+      if (hash.startsWith('#/results/')) {
+        return { view: 'results', pollId: hash.slice(10) };
+      }
+      return { view: 'create' };
+    }
+
+    async function route() {
+      const { view, pollId, adminKey } = parseHash();
+
+      if (view === 'create') {
+        showView('view-create');
+        document.getElementById('header-subtitle').textContent = 'Find the best date for your next meeting';
+      } else if (view === 'vote') {
+        showView('view-loading');
+        await loadVoteView(pollId);
+      } else if (view === 'admin') {
+        showView('view-loading');
+        await loadAdminView(pollId, adminKey);
+      } else if (view === 'results') {
+        showView('view-loading');
+        await loadPublicResultsView(pollId);
+      }
+    }
+
+    window.addEventListener('hashchange', route);
+
+    // ─── CREATE POLL ───
+    const dateList = document.getElementById('date-list');
+    const dateInput = document.getElementById('date-input');
+    const addDateBtn = document.getElementById('add-date-btn');
+    const createPollBtn = document.getElementById('create-poll-btn');
+    const pollTitleInput = document.getElementById('poll-title');
+    let selectedDates = [];
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    dateInput.value = '';
+
+    function renderDateList() {
+      dateList.innerHTML = '';
+      selectedDates.sort();
+      selectedDates.forEach((d, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = '<span>' + formatDate(d) + '</span>';
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-danger btn-small';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', () => {
+          selectedDates.splice(i, 1);
+          renderDateList();
+          updateCreateBtn();
+        });
+        li.appendChild(removeBtn);
+        dateList.appendChild(li);
+      });
+    }
+
+    function updateCreateBtn() {
+      const hasTitle = pollTitleInput.value.trim().length > 0;
+      const hasDates = selectedDates.length >= 2;
+      createPollBtn.disabled = !(hasTitle && hasDates);
+    }
+
+    addDateBtn.addEventListener('click', () => {
+      const val = dateInput.value;
+      if (!val) return;
+      if (selectedDates.includes(val)) {
+        dateInput.value = '';
+        return;
+      }
+      selectedDates.push(val);
+      dateInput.value = '';
+      renderDateList();
+      updateCreateBtn();
+    });
+
+    dateInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); addDateBtn.click(); }
+    });
+
+    pollTitleInput.addEventListener('input', updateCreateBtn);
+
+    createPollBtn.addEventListener('click', async () => {
+      const title = pollTitleInput.value.trim();
+      const description = document.getElementById('poll-desc').value.trim();
+      if (!title || selectedDates.length < 2) return;
+
+      createPollBtn.disabled = true;
+      createPollBtn.innerHTML = '<span class="spinner"></span> Creating...';
+
+      try {
+        const pollId = generateId(8);
+        const adminKey = generateId(16);
+
+        await api('createPoll', {
+          pollId,
+          adminKey,
+          title,
+          description,
+          dates: [...selectedDates].sort()
+        });
+
+        const base = getBaseUrl();
+        document.getElementById('voter-link').value = base + '#/poll/' + pollId;
+        document.getElementById('admin-link').value = base + '#/admin/' + pollId + '?key=' + adminKey;
+
+        document.getElementById('view-results-btn').addEventListener('click', () => {
+          window.location.hash = '#/admin/' + pollId + '?key=' + adminKey;
+        }, { once: true });
+
+        showView('view-created');
+        document.getElementById('header-subtitle').textContent = 'Poll ready to share';
+
+        // Reset form
+        pollTitleInput.value = '';
+        document.getElementById('poll-desc').value = '';
+        selectedDates = [];
+        renderDateList();
+        updateCreateBtn();
+      } catch (err) {
+        console.error('Error creating poll:', err);
+        alert('Failed to create poll. Please check your internet connection and try again.');
+      } finally {
+        createPollBtn.disabled = false;
+        createPollBtn.textContent = 'Create Poll';
+      }
+    });
+
+    // ─── COPY BUTTONS ───
+    document.addEventListener('click', (e) => {
+      const btn = e.target.closest('.copy-btn');
+      if (!btn) return;
+      const targetId = btn.dataset.copy;
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      navigator.clipboard.writeText(input.value).then(() => {
+        const prev = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = prev; }, 1500);
+      });
+    });
+
+    // ─── VOTE VIEW ───
+    let currentPollId = null;
+    let currentPollData = null;
+    let existingVoterName = null;
+
+    async function loadVoteView(pollId) {
+      try {
+        const result = await api('getPoll', { pollId });
+        if (!result.poll) {
+          showView('view-notfound');
+          return;
+        }
+
+        currentPollId = pollId;
+        currentPollData = result.poll;
+        existingVoterName = null;
+
+        document.getElementById('vote-title').textContent = currentPollData.title;
+        const descEl = document.getElementById('vote-desc');
+        if (currentPollData.description) {
+          descEl.textContent = currentPollData.description;
+          descEl.style.display = '';
+        } else {
+          descEl.style.display = 'none';
+        }
+
+        document.getElementById('header-subtitle').textContent = currentPollData.title;
+
+        // Render date options
+        const container = document.getElementById('vote-dates');
+        container.innerHTML = '';
+        currentPollData.dates.forEach(dateStr => {
+          const div = document.createElement('div');
+          div.className = 'vote-option';
+          div.innerHTML =
+            '<input type="checkbox" value="' + dateStr + '" id="vote-' + dateStr + '">' +
+            '<span class="vote-option-label">' + formatDate(dateStr) + '</span>' +
+            '<span class="vote-option-day">' + getDayName(dateStr) + '</span>';
+          div.addEventListener('click', (e) => {
+            if (e.target.tagName === 'INPUT') {
+              div.classList.toggle('selected', e.target.checked);
+            } else {
+              const cb = div.querySelector('input');
+              cb.checked = !cb.checked;
+              div.classList.toggle('selected', cb.checked);
+            }
+            updateSubmitBtn();
+          });
+          container.appendChild(div);
+        });
+
+        document.getElementById('duplicate-warning').style.display = 'none';
+        document.getElementById('submit-vote-btn').style.display = '';
+        showView('view-vote');
+
+        const nameInput = document.getElementById('voter-name');
+        nameInput.value = '';
+        updateSubmitBtn();
+
+      } catch (err) {
+        console.error('Error loading poll:', err);
+        showView('view-notfound');
+      }
+    }
+
+    function updateSubmitBtn() {
+      const name = document.getElementById('voter-name').value.trim();
+      const checked = document.querySelectorAll('#vote-dates input:checked');
+      document.getElementById('submit-vote-btn').disabled = !(name.length > 0 && checked.length > 0);
+    }
+
+    document.getElementById('voter-name').addEventListener('input', updateSubmitBtn);
+
+    // Check for existing vote when name field loses focus
+    let nameCheckTimeout = null;
+    document.getElementById('voter-name').addEventListener('input', () => {
+      clearTimeout(nameCheckTimeout);
+      const name = document.getElementById('voter-name').value.trim();
+      if (!name || !currentPollId) {
+        document.getElementById('duplicate-warning').style.display = 'none';
+        existingVoterName = null;
+        return;
+      }
+      nameCheckTimeout = setTimeout(async () => {
+        try {
+          const result = await api('getVotes', { pollId: currentPollId });
+          existingVoterName = null;
+          (result.votes || []).forEach(v => {
+            if (v.voterName.toLowerCase() === name.toLowerCase()) {
+              existingVoterName = v.voterName;
+            }
+          });
+          document.getElementById('duplicate-warning').style.display = existingVoterName ? '' : 'none';
+        } catch (e) {
+          // Ignore lookup errors
+        }
+      }, 600);
+    });
+
+    document.getElementById('submit-vote-btn').addEventListener('click', submitVote);
+    document.getElementById('update-vote-btn').addEventListener('click', submitVote);
+
+    async function submitVote() {
+      const name = document.getElementById('voter-name').value.trim();
+      const checked = [...document.querySelectorAll('#vote-dates input:checked')].map(cb => cb.value);
+      if (!name || checked.length === 0 || !currentPollId) return;
+
+      const btn = document.getElementById('submit-vote-btn');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+      try {
+        await api('submitVote', {
+          pollId: currentPollId,
+          voterName: name,
+          selectedDates: checked
+        });
+
+        document.getElementById('view-results-from-thanks-btn').onclick = () => {
+          window.location.hash = '#/results/' + currentPollId;
+        };
+
+        showView('view-thanks');
+        document.getElementById('header-subtitle').textContent = 'Thank you!';
+      } catch (err) {
+        console.error('Error submitting vote:', err);
+        alert('Failed to submit vote. Please check your connection and try again.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Submit Vote';
+      }
+    }
+
+    // ─── ADMIN RESULTS VIEW ───
+    let adminPollId = null;
+    let adminAdminKey = null;
+
+    async function loadAdminView(pollId, adminKey) {
+      try {
+        const result = await api('getPoll', { pollId });
+        if (!result.poll) {
+          showView('view-notfound');
+          return;
+        }
+
+        const pollData = result.poll;
+
+        // Verify admin key
+        if (pollData.adminKey !== adminKey) {
+          showView('view-notfound');
+          return;
+        }
+
+        adminPollId = pollId;
+        adminAdminKey = adminKey;
+
+        document.getElementById('admin-title').textContent = pollData.title;
+        document.getElementById('header-subtitle').textContent = pollData.title + ' — Results';
+
+        const descEl = document.getElementById('admin-desc');
+        if (pollData.description) {
+          descEl.textContent = pollData.description;
+          descEl.style.display = '';
+        } else {
+          descEl.style.display = 'none';
+        }
+
+        document.getElementById('admin-voter-link').value = getBaseUrl() + '#/poll/' + pollId;
+
+        showView('view-admin');
+
+        // Load votes
+        await refreshAdminResults(pollId, pollData);
+
+      } catch (err) {
+        console.error('Error loading admin view:', err);
+        showView('view-notfound');
+      }
+    }
+
+    async function refreshAdminResults(pollId, pollData) {
+      const container = document.getElementById('results-content');
+      container.innerHTML = '<div class="loading-msg"><span class="spinner"></span> Loading results...</div>';
+
+      try {
+        // If pollData not passed, re-fetch it
+        if (!pollData) {
+          const pollResult = await api('getPoll', { pollId });
+          pollData = pollResult.poll;
+        }
+        const result = await api('getVotes', { pollId });
+        renderResults('results-content', 'voter-count', pollData, result.votes || []);
+      } catch (err) {
+        container.innerHTML = '<div class="alert alert-error">Failed to load results. Try refreshing.</div>';
+      }
+    }
+
+    document.getElementById('refresh-results-btn').addEventListener('click', () => {
+      if (adminPollId) refreshAdminResults(adminPollId, null);
+    });
+
+    // ─── PUBLIC RESULTS VIEW ───
+    let publicResultsPollId = null;
+
+    async function loadPublicResultsView(pollId) {
+      try {
+        const result = await api('getPoll', { pollId });
+        if (!result.poll) {
+          showView('view-notfound');
+          return;
+        }
+
+        const pollData = result.poll;
+        publicResultsPollId = pollId;
+
+        document.getElementById('public-results-title').textContent = pollData.title + ' — Results';
+        document.getElementById('header-subtitle').textContent = pollData.title;
+
+        showView('view-results');
+
+        await refreshPublicResults(pollId, pollData);
+
+      } catch (err) {
+        console.error('Error loading results:', err);
+        showView('view-notfound');
+      }
+    }
+
+    async function refreshPublicResults(pollId, pollData) {
+      const container = document.getElementById('public-results-content');
+      container.innerHTML = '<div class="loading-msg"><span class="spinner"></span> Loading results...</div>';
+
+      try {
+        if (!pollData) {
+          const pollResult = await api('getPoll', { pollId });
+          pollData = pollResult.poll;
+        }
+        const result = await api('getVotes', { pollId });
+        renderResults('public-results-content', 'public-voter-count', pollData, result.votes || []);
+      } catch (err) {
+        container.innerHTML = '<div class="alert alert-error">Failed to load results. Try refreshing.</div>';
+      }
+    }
+
+    document.getElementById('refresh-public-results-btn').addEventListener('click', () => {
+      if (publicResultsPollId) refreshPublicResults(publicResultsPollId, null);
+    });
+
+    // ─── RENDER RESULTS TABLE ───
+    function renderResults(containerId, countId, pollData, votes) {
+      const container = document.getElementById(containerId);
+      const countEl = document.getElementById(countId);
+
+      countEl.textContent = votes.length + ' vote' + (votes.length !== 1 ? 's' : '');
+
+      if (votes.length === 0) {
+        container.innerHTML = '<div class="no-votes">No votes yet. Share the voter link to get started!</div>';
+        return;
+      }
+
+      // Sort votes by name
+      votes.sort((a, b) => a.voterName.localeCompare(b.voterName));
+
+      // Count votes per date
+      const dateCounts = {};
+      pollData.dates.forEach(d => { dateCounts[d] = 0; });
+      votes.forEach(v => {
+        (v.selectedDates || []).forEach(d => {
+          if (dateCounts[d] !== undefined) dateCounts[d]++;
+        });
+      });
+
+      const maxCount = Math.max.apply(null, Object.values(dateCounts));
+
+      // Build table
+      var html = '<div class="results-table-wrap"><table class="results-table">';
+
+      // Header row
+      html += '<thead><tr><th>Date</th>';
+      votes.forEach(v => {
+        html += '<th>' + escapeHtml(v.voterName) + '</th>';
+      });
+      html += '<th>Total</th></tr></thead>';
+
+      // Date rows
+      html += '<tbody>';
+      pollData.dates.forEach(dateStr => {
+        const count = dateCounts[dateStr];
+        const isBest = count === maxCount && count > 0;
+        html += '<tr class="' + (isBest ? 'best-date' : '') + '">';
+        html += '<td>' + formatDate(dateStr) + '</td>';
+        votes.forEach(v => {
+          const voted = (v.selectedDates || []).indexOf(dateStr) !== -1;
+          html += '<td>' + (voted ? '<span class="vote-check">&#10003;</span>' : '') + '</td>';
+        });
+        html += '<td class="vote-count">' + count + '</td>';
+        html += '</tr>';
+      });
+      html += '</tbody>';
+
+      html += '</table></div>';
+
+      // Best date summary
+      const bestDates = pollData.dates.filter(d => dateCounts[d] === maxCount && maxCount > 0);
+      if (bestDates.length > 0) {
+        html += '<div class="alert alert-success" style="margin-top:16px;">';
+        if (bestDates.length === 1) {
+          html += '<strong>Best date:</strong> ' + formatDate(bestDates[0]) + ' (' + maxCount + ' vote' + (maxCount !== 1 ? 's' : '') + ')';
+        } else {
+          html += '<strong>Tied dates</strong> (' + maxCount + ' vote' + (maxCount !== 1 ? 's' : '') + ' each):<br>';
+          html += bestDates.map(d => formatDate(d)).join(', ');
+        }
+        html += '</div>';
+      }
+
+      container.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ─── Init ───
+    route();
+  </script>
+</body>
+</html>
