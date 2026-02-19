@@ -588,16 +588,26 @@
     </div>
   </div>
 
+  <!-- Config loaded from separate file (gitignored — keeps secrets out of the repo) -->
+  <script src="config.js"></script>
   <script>
     // ─── Google Apps Script Backend ───
-    // REPLACE this URL with your deployed Apps Script web app URL.
-    // See SETUP.md for instructions.
-    const API_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+    // API URL and secret are loaded from config.js (see config.example.js)
+    if (typeof POLL_CONFIG === 'undefined' || !POLL_CONFIG.apiUrl || POLL_CONFIG.apiUrl === 'YOUR_APPS_SCRIPT_URL_HERE') {
+      document.body.innerHTML = '<div style="max-width:500px;margin:80px auto;padding:24px;font-family:sans-serif;text-align:center;">' +
+        '<h2 style="color:#991b1b;">Config Missing</h2>' +
+        '<p style="color:#6b7280;margin-top:12px;">Copy <code>config.example.js</code> to <code>config.js</code> and fill in your Apps Script URL and secret.</p>' +
+        '<p style="color:#6b7280;margin-top:8px;">See <a href="SETUP.md">SETUP.md</a> for instructions.</p></div>';
+      throw new Error('config.js not found or not configured');
+    }
+
+    const API_URL = POLL_CONFIG.apiUrl;
+    const API_SECRET = POLL_CONFIG.secret;
 
     async function api(action, data = {}) {
       const resp = await fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify({ action, ...data }),
+        body: JSON.stringify({ action, secret: API_SECRET, ...data }),
         headers: { 'Content-Type': 'text/plain' },
         redirect: 'follow'
       });

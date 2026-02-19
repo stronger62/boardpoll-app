@@ -5,14 +5,26 @@
  * as a database. It handles creating polls, submitting votes, and
  * reading results.
  *
+ * SECURITY: Every request must include a `secret` field that matches
+ * the APP_SECRET below. Change this to your own random string.
+ *
  * SHEET STRUCTURE (auto-created on first run):
  *   "Polls" sheet: pollId | title | description | dates (comma-separated) | adminKey | createdAt
  *   "Votes" sheet: pollId | voterName | selectedDates (comma-separated) | submittedAt
  */
 
+// ─── CHANGE THIS to your own random string ───
+var APP_SECRET = 'CHANGE_ME_TO_A_RANDOM_STRING';
+
 function doPost(e) {
   try {
     var body = JSON.parse(e.postData.contents);
+
+    // Verify secret on every request
+    if (body.secret !== APP_SECRET) {
+      return jsonResponse({ error: 'Unauthorized' });
+    }
+
     var action = body.action;
 
     if (action === 'createPoll') return jsonResponse(createPoll(body));

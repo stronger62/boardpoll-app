@@ -10,7 +10,8 @@ One-time setup (~15 minutes). After this, your dad just opens the app, creates p
 4. This opens the Apps Script editor in a new tab
 5. Delete any code already in the editor (the default `myFunction` stub)
 6. Copy the **entire** contents of `apps-script/Code.gs` from this repo and paste it in
-7. Click the **Save** icon (or Ctrl+S) — name the project "Board Poll API" when prompted
+7. **Change the `APP_SECRET` value** (line 18) to a random string of your choice — e.g. `board-poll-s3cret-xyz`. This must match what you put in `config.js` later.
+8. Click the **Save** icon (or Ctrl+S) — name the project "Board Poll API" when prompted
 
 ## Step 2: Deploy the Apps Script as a Web App
 
@@ -26,27 +27,31 @@ One-time setup (~15 minutes). After this, your dad just opens the app, creates p
    - This is safe — you wrote this script yourself, Google just warns about all unreviewed scripts
 6. **Copy the Web App URL** — it looks like: `https://script.google.com/macros/s/ABCDE.../exec`
 
-## Step 3: Paste the URL into index.html
+## Step 3: Create config.js
 
-1. Open `index.html` in any text editor
-2. Find this line near the top of the `<script>` section:
+1. Copy `config.example.js` to `config.js`:
    ```
-   const API_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+   cp config.example.js config.js
    ```
-3. Replace `YOUR_APPS_SCRIPT_URL_HERE` with the URL you copied in Step 2
-4. Save the file
+2. Open `config.js` and fill in:
+   - `apiUrl`: paste the Web App URL from Step 2
+   - `secret`: paste the same `APP_SECRET` value you set in Step 1
+3. `config.js` is in `.gitignore` — it will **never** be committed to the repo
 
 ## Step 4: Host the HTML file
 
 **Option A: GitHub Pages (recommended)**
 1. Push this repo to GitHub
 2. Go to repo Settings > Pages > Source: select "main" branch > Save
-3. Your app will be live at `https://<username>.github.io/dad-boardpoll-app/`
+3. Your app will be live at `https://<username>.github.io/<repo>/`
+4. **Important**: You must also upload `config.js` to your live site. GitHub Pages serves all files in the branch, but since `config.js` is gitignored, you'll need to either:
+   - Temporarily remove it from `.gitignore`, commit, push, then re-add to `.gitignore` — OR
+   - Use the GitHub web UI to manually create the `config.js` file in the repo
 
 **Option B: Open locally**
 - Just double-click `index.html` to open it in a browser. It works!
+- Make sure `config.js` is in the same folder as `index.html`
 - The only downside: the URL you share with board members will be a `file://` path, which only works on your computer
-- For sharing, use Option A or any static hosting (Netlify drop, Vercel, etc.)
 
 ## That's it!
 
@@ -70,10 +75,25 @@ Open the Google Sheet at any time to see two tabs:
 - **Polls**: all created polls with their titles, dates, and admin keys
 - **Votes**: every vote with voter name, selected dates, and timestamp
 
+## Security
+
+- The Apps Script URL and secret are kept in `config.js`, which is **gitignored** — they never appear in the public repo
+- Every API request includes the secret; the Apps Script rejects requests without it
+- Anyone who can view the live page source *could* find the secret (it's client-side JavaScript) — but they'd need both the URL of your hosted page AND to inspect the source
+- For a private board poll, this is more than sufficient
+
 ## Troubleshooting
 
+**"Config Missing" error when opening the app**
+- Make sure `config.js` exists in the same directory as `index.html`
+- Make sure you copied `config.example.js` to `config.js` and filled in the values
+
+**"Unauthorized" error**
+- The `secret` in `config.js` doesn't match the `APP_SECRET` in your Apps Script
+- Make sure they're identical
+
 **"Failed to create poll" error**
-- Make sure the Apps Script URL is correct in `index.html`
+- Make sure the Apps Script URL is correct in `config.js`
 - Make sure you deployed as a Web App with "Anyone" access
 
 **Updating the Apps Script code**
@@ -85,5 +105,5 @@ If you ever need to update `Code.gs`:
 5. Click Deploy
 
 **Votes not showing up**
-- Click the "Refresh Results" button — unlike the Firebase version, this doesn't auto-update
+- Click the "Refresh Results" button
 - Check the Google Sheet directly to see if the vote row exists
