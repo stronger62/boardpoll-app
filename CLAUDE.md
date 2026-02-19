@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Live Site
+
+https://stronger62.github.io/boardpoll-app/
+
+After pushing changes, verify the deployed site once the GitHub Actions workflow completes (~1 min). Use a hard refresh (Cmd+Shift+R) to bypass browser cache when testing.
+
 ## Project Overview
 
 A no-build, no-dependencies board meeting date poll app. The frontend is a single self-contained HTML file; the backend is a Google Apps Script web app that uses a Google Sheet as its database.
