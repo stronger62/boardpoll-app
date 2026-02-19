@@ -28,10 +28,15 @@ jobs:
         env:
           APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
           APP_SECRET: ${{ secrets.APP_SECRET }}
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
         run: |
           python3 -c "
           import os, json
-          config = {'apiUrl': os.environ['APPS_SCRIPT_URL'], 'secret': os.environ['APP_SECRET']}
+          config = {
+            'apiUrl': os.environ['APPS_SCRIPT_URL'],
+            'secret': os.environ['APP_SECRET'],
+            'sitePassword': os.environ.get('SITE_PASSWORD', '')
+          }
           print('const POLL_CONFIG = ' + json.dumps(config) + ';')
           " > config.js
 

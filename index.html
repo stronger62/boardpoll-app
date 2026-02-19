@@ -586,6 +586,19 @@
         <button class="btn btn-secondary" onclick="location.hash='#/'" style="margin-top:8px;">Create a New Poll</button>
       </div>
     </div>
+
+    <!-- VIEW: Auth -->
+    <div id="view-auth" class="view">
+      <div class="card">
+        <h2>Enter Password</h2>
+        <div class="form-group">
+          <label for="auth-password">Password</label>
+          <input type="password" id="auth-password" placeholder="Enter password">
+        </div>
+        <div id="auth-error" class="alert alert-error" style="display:none;">Incorrect password.</div>
+        <button class="btn btn-primary" id="auth-submit-btn" style="width:100%;">Continue</button>
+      </div>
+    </div>
   </div>
 
   <!-- Config loaded from separate file (gitignored — keeps secrets out of the repo) -->
@@ -603,6 +616,7 @@
 
     const API_URL = POLL_CONFIG.apiUrl;
     const API_SECRET = POLL_CONFIG.secret;
+    const SITE_PASSWORD = POLL_CONFIG.sitePassword || '';
 
     async function api(action, data = {}) {
       const resp = await fetch(API_URL, {
@@ -690,7 +704,7 @@
       }
     }
 
-    window.addEventListener('hashchange', route);
+    window.addEventListener('hashchange', () => { if (isAuthenticated()) route(); });
 
     // ─── CREATE POLL ───
     const dateList = document.getElementById('date-list');
@@ -1133,8 +1147,37 @@
       return div.innerHTML;
     }
 
+    // ─── Auth Gate ───
+    function isAuthenticated() {
+      if (!SITE_PASSWORD) return true;
+      return sessionStorage.getItem('poll_auth') === SITE_PASSWORD;
+    }
+
+    function initAuth() {
+      if (isAuthenticated()) { route(); return; }
+
+      showView('view-auth');
+      const input = document.getElementById('auth-password');
+      const error = document.getElementById('auth-error');
+
+      function attempt() {
+        if (input.value === SITE_PASSWORD) {
+          sessionStorage.setItem('poll_auth', SITE_PASSWORD);
+          error.style.display = 'none';
+          route();
+        } else {
+          error.style.display = '';
+          input.value = '';
+          input.focus();
+        }
+      }
+
+      document.getElementById('auth-submit-btn').addEventListener('click', attempt);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
+    }
+
     // ─── Init ───
-    route();
+    initAuth();
   </script>
 </body>
 </html>

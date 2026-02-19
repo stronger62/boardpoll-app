@@ -7,5 +7,6 @@
 
 const POLL_CONFIG = {
   apiUrl: 'YOUR_APPS_SCRIPT_URL_HERE',
-  secret: 'YOUR_SECRET_HERE'
+  secret: 'YOUR_SECRET_HERE',
+  sitePassword: 'YOUR_SITE_PASSWORD_HERE'  // leave empty string '' to disable
 };

@@ -21,6 +21,7 @@ To deploy Apps Script changes: edit in the Google Apps Script editor, then go to
 
 - `APPS_SCRIPT_URL` — the deployed web app URL from Apps Script
 - `APP_SECRET` — must match `APP_SECRET` in `Code.gs`
+- `SITE_PASSWORD` — password shown to all visitors before the app loads (leave empty to disable)
 
 Add these at: repo Settings → Secrets and variables → Actions → New repository secret.
 
