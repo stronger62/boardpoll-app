@@ -86,9 +86,15 @@ function getVotes(data) {
 
   for (var i = 1; i < rows.length; i++) {
     if (rows[i][0] === data.pollId) {
+      // Google Sheets may auto-convert a single ISO date string (e.g. "2024-01-15")
+      // to a Date object. Normalise back to a string before splitting.
+      var rawDates = rows[i][2];
+      var datesStr = (rawDates instanceof Date)
+        ? Utilities.formatDate(rawDates, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+        : String(rawDates || '');
       votes.push({
         voterName:     rows[i][1],
-        selectedDates: rows[i][2] ? rows[i][2].split(',') : [],
+        selectedDates: datesStr ? datesStr.split(',') : [],
         submittedAt:   rows[i][3]
       });
     }
